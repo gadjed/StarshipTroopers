@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="uk">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Орда · прототип</title>
+  </head>
+  <body>
+    <canvas id="view"></canvas>
+    <div class="scanlines"></div>
+
+    <section class="hud hud-left">
+      <header>▌ТАКТИЧНИЙ ВУЗОЛ · СЕКТОР Q-17</header>
+      <div class="row"><span>FPS</span><b id="s-fps">--</b></div>
+      <div class="row"><span>КАДР</span><b id="s-frame">--</b></div>
+      <div class="row"><span>СИМУЛЯЦІЯ</span><b id="s-sim">--</b></div>
+      <div class="row"><span>РЕНДЕР CPU</span><b id="s-render">--</b></div>
+      <div class="row"><span>РЕНДЕР GPU</span><b id="s-gpu">--</b></div>
+      <hr />
+      <div class="row warn"><span>ЯДРО БУНКЕРА</span><b id="s-core">--</b></div>
+      <div class="row"><span>ВБИТО ОБОРОНОЮ</span><b id="s-kills">--</b></div>
+      <div class="row"><span>БУДІВЕЛЬ / СНАРЯДІВ</span><b id="s-defense">--</b></div>
+      <hr />
+      <div class="row"><span>ЖУКІВ ЖИВИХ</span><b id="s-alive">--</b></div>
+      <div class="row"><span>ЛІМІТ ЗАРАЗ</span><b id="s-limit">--</b></div>
+      <div class="row warn"><span>ПРОРИВІВ</span><b id="s-breaks">--</b></div>
+      <div class="row"><span>СПАВН</span><b id="s-spawn">--</b></div>
+      <div class="row warn"><span>ХВИЛЯ</span><b id="s-wave">--</b></div>
+      <div class="row warn"><span>КОМАНДИРИ (ЖИВІ / ВБИТО)</span><b id="s-cmd">--</b></div>
+      <div class="row"><span>З'ЇДЕНО СВОЇМИ</span><b id="s-eaten">--</b></div>
+      <div class="row"><span>КРАТЕРИ / СКЕЛЬ ВПАЛО</span><b id="s-rocks">--</b></div>
+      <div class="row"><span>ФОНОВА ЗАДАЧА</span><b id="s-job">--</b></div>
+      <hr />
+      <div class="row"><span>SEED</span><b id="s-seed">--</b></div>
+      <div class="row"><span>ПОКРИТТЯ СКЕЛЯМИ</span><b id="s-cover">--</b></div>
+      <div class="row"><span>SHARED MEMORY</span><b id="s-sab">--</b></div>
+      <div class="row"><span>КООРДИНАТИ</span><b id="s-cursor">--</b></div>
+      <hr />
+      <div class="legend" id="legend"></div>
+    </section>
+
+    <section class="hud hud-right">
+      <header>▌КЕРУВАННЯ</header>
+      <label class="slider">
+        <span><em id="v-limit-label">ЛІМІТ ЖУКІВ</em> <b id="v-limit"></b></span>
+        <input id="c-limit" type="range" min="1" max="200" step="1" />
+      </label>
+      <label class="check"><input id="c-autolimit" type="checkbox" /> АВТО-ЛІМІТ ≥60 FPS [L]</label>
+      <label class="check"><input id="c-waves" type="checkbox" /> ХВИЛІ (АВТО-СПАВН) [W]</label>
+      <label class="slider" id="spawn-row">
+        <span>ШВИДКІСТЬ СПАВНУ <b id="v-spawn"></b></span>
+        <input id="c-spawn" type="range" min="0" max="100" step="1" />
+      </label>
+      <label class="slider">
+        <span>ШВИДКІСТЬ ЖУКІВ <b id="v-speed"></b></span>
+        <input id="c-speed" type="range" min="0.2" max="3" step="0.05" />
+      </label>
+      <label class="slider">
+        <span>РОЗШТОВХУВАННЯ <b id="v-push"></b></span>
+        <input id="c-push" type="range" min="0" max="3" step="0.05" />
+      </label>
+      <label class="slider">
+        <span>ОБХІД СКУПЧЕНЬ <b id="v-avoid"></b></span>
+        <input id="c-avoid" type="range" min="0" max="3" step="0.05" />
+      </label>
+      <label class="slider">
+        <span>ОБХІД ЗАТОРІВ <b id="v-jam"></b></span>
+        <input id="c-jam" type="range" min="0" max="3" step="0.05" />
+      </label>
+      <label class="slider">
+        <span>РУЙНУВАННЯ (КОРОЗІЯ, УКУСИ) <b id="v-destroy"></b></span>
+        <input id="c-destroy" type="range" min="0" max="5" step="0.1" />
+      </label>
+      <div class="group">
+        <span>РЕЖИМ</span>
+        <div class="seg" id="c-mode">
+          <button data-mode="0">ПРОРИВ</button>
+          <button data-mode="1">ОБЛОГА</button>
+        </div>
+      </div>
+      <div class="group">
+        <span>ЧАСТОТА СИМУЛЯЦІЇ</span>
+        <div class="seg" id="c-hz">
+          <button data-hz="30">30 ГЦ</button>
+          <button data-hz="60">60 ГЦ</button>
+        </div>
+      </div>
+      <label class="check"><input id="c-flow" type="checkbox" /> FLOW FIELD [F]</label>
+      <label class="check"><input id="c-grid" type="checkbox" /> SPATIAL GRID [G]</label>
+      <label class="check"><input id="c-zones" type="checkbox" /> РОБОЧІ ЗОНИ ЗБРОЇ [Z]</label>
+      <div class="buttons">
+        <button id="c-pause">ПАУЗА [␣]</button>
+        <button id="c-clear">ОЧИСТИТИ [C]</button>
+        <button id="c-map">НОВА МАПА [N]</button>
+        <button id="c-fit">ОГЛЯД [0]</button>
+        <button id="c-cmd">КОМАНДИР [K]</button>
+      </div>
+    </section>
+
+    <div class="hud hud-bottom">
+      <div class="build-bar" id="build-bar"></div>
+      <div class="build-hint" id="build-hint"></div>
+    </div>
+    <div class="paused-banner" id="paused">// СИМУЛЯЦІЮ ПРИЗУПИНЕНО //</div>
+    <div class="paused-banner wave-banner" id="wave-banner"></div>
+    <div class="paused-banner gameover-banner" id="gameover-banner"></div>
+    <div class="boot" id="boot">// ПРОГРІВ СИМУЛЯЦІЇ… //</div>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
